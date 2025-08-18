@@ -2,9 +2,12 @@ import init, { Universe } from "./pkg/rgol_wasm.js";
 
 let memory;
 
-const CELL_SIZE = 8;  // px
-const GAP = 1;        // px
+const CELL_SIZE = 8;
+const GAP = 1;
+const UPDATE_INTERVAL_MS = 62;
+
 let universe, ctx, width, height;
+let lastFrame = 0;
 
 async function run() {
   const wasm = await init();
@@ -18,24 +21,26 @@ async function run() {
   width = Math.floor(canvas.width / (CELL_SIZE + GAP));
   height = Math.floor(canvas.height / (CELL_SIZE + GAP));
 
-  universe = new Universe(width, height, 0.9); // 90% live cells
+  universe = new Universe(width, height, 0.13);
 
   requestAnimationFrame(renderLoop);
 }
 
-function renderLoop() {
-  universe.tick();
+function renderLoop(timestamp) {
+  if (timestamp - lastFrame > UPDATE_INTERVAL_MS) {
+    universe.tick();
 
-  const ptr = universe.cells_ptr();
-  const cells = new Uint8Array(memory.buffer, ptr, width * height);
+    const ptr = universe.cells_ptr();
+    const cells = new Uint8Array(memory.buffer, ptr, width * height);
 
-  // reseed if almost dead
-  const liveCount = cells.reduce((a, b) => a + b, 0);
-  if (liveCount < (width * height) * 0.05) {
-    universe.randomize(0.3);
+    const liveCount = cells.reduce((a, b) => a + b, 0);
+    if (liveCount < (width * height) * 0.05) {
+      universe.randomize(0.13);
+    }
+
+    drawCells(cells);
+    lastFrame = timestamp;
   }
-
-  drawCells(cells);
   requestAnimationFrame(renderLoop);
 }
 
