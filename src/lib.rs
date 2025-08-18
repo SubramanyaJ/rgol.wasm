@@ -48,6 +48,13 @@ impl Universe {
 
     pub fn width(&self) -> u32 { self.width }
     pub fn height(&self) -> u32 { self.height }
+
+    /// Randomize cells with probability `p` of being alive
+    pub fn randomize(&mut self, p: f64) {
+        for c in self.cells.iter_mut() {
+            *c = if Math::random() < p { 1 } else { 0 };
+        }
+    }
 }
 
 impl Universe {

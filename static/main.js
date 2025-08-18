@@ -1,6 +1,5 @@
 import init, { Universe } from "./pkg/rgol_wasm.js";
 
-// memory is available via init.exports.memory
 let memory;
 
 const CELL_SIZE = 8;  // px
@@ -9,7 +8,7 @@ let universe, ctx, width, height;
 
 async function run() {
   const wasm = await init();
-  memory = wasm.memory;   // grab memory from wasm exports
+  memory = wasm.memory;
 
   const canvas = document.getElementById("life");
   ctx = canvas.getContext("2d");
@@ -29,6 +28,12 @@ function renderLoop() {
 
   const ptr = universe.cells_ptr();
   const cells = new Uint8Array(memory.buffer, ptr, width * height);
+
+  // reseed if almost dead
+  const liveCount = cells.reduce((a, b) => a + b, 0);
+  if (liveCount < (width * height) * 0.05) {
+    universe.randomize(0.3);
+  }
 
   drawCells(cells);
   requestAnimationFrame(renderLoop);
