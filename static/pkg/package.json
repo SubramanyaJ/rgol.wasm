@@ -1,0 +1,13 @@
+{
+  "name": "rgol_wasm",
+  "type": "module",
+  "version": "0.1.0",
+  "files": [
+    "rgol_wasm_bg.wasm",
+    "rgol_wasm.js"
+  ],
+  "main": "rgol_wasm.js",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}
